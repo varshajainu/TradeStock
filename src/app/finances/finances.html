@@ -1,0 +1,201 @@
+<div class="accounts-container">
+  <div class="header-row">
+    <h2>Financial Accounts & Transfers</h2>
+    <!-- <button (click)="loadData()" class="icon-refresh-btn" title="Refresh Data">🔄</button> -->
+  </div>
+
+  <div class="top-grid">
+    <div class="card add-account-card" [ngClass]="{'editing-mode': isEditingAccount}">
+      <h3>{{ isEditingAccount ? '✏️ Edit Account' : '🏦 Create Bank Account' }}</h3>
+      
+      <div class="form-group">
+        <label>Bank Name (e.g. SBI, HDFC)</label>
+        <input type="text" [(ngModel)]="newAccount.bankName">
+      </div>
+      <div class="form-group">
+        <label>Account Number (or Last 4 Digits)</label>
+        <input type="text" [(ngModel)]="newAccount.accountNumber" placeholder="e.g. 9876543210">
+      </div>
+      <div class="form-group">
+        <label>Account Holder Name</label>
+        <input type="text" [(ngModel)]="newAccount.holderName">
+      </div>
+      <div class="form-group">
+        <label>Initial Balance (₹)</label>
+        <input type="number" [(ngModel)]="newAccount.initialBalance">
+      </div>
+      
+      <div class="action-buttons-row">
+        <button class="btn-primary" (click)="saveAccount()">
+          {{ isEditingAccount ? 'Update Account' : 'Save Account' }}
+        </button>
+        <button class="btn-cancel" *ngIf="isEditingAccount" (click)="cancelEditAccount()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h3 class="section-title">Active Accounts</h3>
+    <div class="global-actions">
+      <button (click)="openAddMoneyModal()" class="btn-global-add">➕ Add Money</button>
+      <button (click)="openWithdrawModal()" class="btn-global-withdraw">➖ Withdraw Money</button>
+      
+      <button (click)="openAccountModal('edit')" class="btn-global-edit">✏️ Edit</button>
+      <button (click)="openAccountModal('delete')" class="btn-global-delete">🗑️ Delete</button>
+    </div>
+  </div>
+
+  <div class="accounts-grid">
+    <div class="account-card" *ngFor="let acc of accounts">
+      <div class="acc-info">
+        <h4>{{ acc.bankName }}</h4>
+        <p class="acc-number">A/C: {{ acc.accountNumber || 'N/A' }}</p>
+        <p class="holder">{{ acc.holderName }}</p>
+      </div>
+      
+      <div class="balance-display" *ngIf="unlockedAccounts[acc.id]">
+        <span class="revealed">₹ {{ acc.balance }}</span>
+      </div>
+      <div class="balance-display" *ngIf="!unlockedAccounts[acc.id]">
+        <span>₹ * * * * *</span>
+      </div>
+      
+      <button class="btn-view-balance" *ngIf="!unlockedAccounts[acc.id]" (click)="requestViewBalance(acc.id)">👁️ View Balance</button>
+      <button class="btn-hide-balance" *ngIf="unlockedAccounts[acc.id]" (click)="hideBalance(acc.id)">Hide Balance</button>
+    </div>
+    <div *ngIf="accounts.length === 0" class="empty-note">No accounts added yet.</div>
+  </div>
+
+  <hr>
+
+  <div class="transfer-section">
+    <div class="transfer-header">
+      <h3>Internal Account Transfers</h3>
+      <select [(ngModel)]="sortOption" (change)="sortTransfers()">
+        <option value="newest">Sort: Newest First</option>
+        <option value="oldest">Sort: Oldest First</option>
+      </select>
+    </div>
+    
+    <div class="transfer-form-row">
+      <select [(ngModel)]="newTransfer.fromAccount">
+        <option value="" disabled>Select FROM Account</option>
+        <option *ngFor="let acc of accounts" [value]="acc.id">{{ acc.bankName }} ({{ acc.holderName }})</option>
+      </select>
+      
+      <select [(ngModel)]="newTransfer.toAccount">
+        <option value="" disabled>Select TO Account</option>
+        <option *ngFor="let acc of accounts" [value]="acc.id">{{ acc.bankName }} ({{ acc.holderName }})</option>
+      </select>
+
+      <input type="number" [(ngModel)]="newTransfer.amount" placeholder="Amount (₹)">
+      <button class="btn-primary" (click)="recordTransfer()">Log Transfer</button>
+    </div>
+
+    <table class="transfer-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>From Account</th>
+          <th>To Account</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of transfers">
+          <td>{{ tx.date | date:'short' }}</td>
+          
+          <td>
+            <span *ngIf="tx.fromBank">{{ tx.fromBank }} ({{ tx.fromHolder }})</span>
+            <span *ngIf="!tx.fromBank" style="color: #38a169; font-weight: bold;">External Deposit</span>
+          </td>
+          <td>
+            <span *ngIf="tx.toBank">{{ tx.toBank }} ({{ tx.toHolder }})</span>
+            <span *ngIf="!tx.toBank" style="color: #e53e3e; font-weight: bold;">External Withdrawal</span>
+          </td>
+          
+          <td class="amount-text">₹{{ tx.amount }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showAdjustModal">
+  <div class="modal-content auth-box">
+    <div class="modal-header" [ngClass]="adjustType === 'ADD' ? 'bg-green' : 'bg-orange'">
+      <h3>{{ adjustType === 'ADD' ? '➕ Add Money' : '➖ Withdraw Money' }}</h3>
+      <button class="close-modal-btn" (click)="closeAdjustModal()">✖</button>
+    </div>
+    <div class="auth-body">
+      <div class="form-group text-left mb-20">
+        <label>{{ adjustType === 'ADD' ? 'Select Target Account' : 'Select Source Account' }}</label>
+        <select [(ngModel)]="adjustForm.accountId" class="large-select">
+          <option value="" disabled>Choose Account...</option>
+          <option *ngFor="let acc of accounts" [value]="acc.id">{{acc.bankName}} ({{acc.holderName}})</option>
+        </select>
+      </div>
+      <div class="form-group text-left">
+        <label>Amount (₹)</label>
+        <input type="number" [(ngModel)]="adjustForm.amount" class="large-select" placeholder="0">
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-primary-big" [ngClass]="adjustType === 'ADD' ? 'bg-green' : 'bg-orange'" (click)="executeAdjustBalance()">
+        {{ adjustType === 'ADD' ? 'Add Funds' : 'Withdraw Funds' }}
+      </button>
+      <button class="btn-cancel-big" (click)="closeAdjustModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showPasswordModal">
+  <div class="modal-content auth-box">
+    <div class="modal-header auth-header">
+      <h3>🔒 Security Check</h3>
+    </div>
+    <div class="auth-body">
+      <p>Please enter the admin password to view this balance.</p>
+      <input type="password" [(ngModel)]="enteredPassword" (keyup.enter)="verifyPassword()" placeholder="Enter Password..." autofocus>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-primary-big" (click)="verifyPassword()">View</button>
+      <button class="btn-cancel-big" (click)="showPasswordModal = false">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showAccountModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ accountModalAction === 'edit' ? '✏️ Edit' : '🗑️ Delete' }} Account</h3>
+      <button class="close-modal-btn" (click)="closeAccountModal()">✖</button>
+    </div>
+    <div class="modal-search-box">
+      <input type="text" [(ngModel)]="accountSearch" (ngModelChange)="filterAccountModal()" placeholder="Search Bank or Name...">
+    </div>
+    <div class="modal-item-list">
+      <div class="modal-item" *ngFor="let acc of filteredAccounts" (click)="handleAccountSelect(acc)" [ngClass]="{'delete-hover': accountModalAction === 'delete'}">
+        <span class="modal-item-name">{{acc.bankName}}</span>
+        <span class="modal-item-category">A/C: {{acc.accountNumber}} | {{acc.holderName}}</span>
+      </div>
+      <div class="modal-empty" *ngIf="filteredAccounts.length === 0">No accounts found.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showConfirmModal">
+  <div class="modal-content confirm-box">
+    <div class="modal-header delete-header">
+      <h3>⚠️ Warning</h3>
+    </div>
+    <div class="confirm-body">
+      <p>Are you sure you want to delete this Bank Account?</p>
+      <p class="sub-text">This will permanently erase it from the dashboard.</p>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-delete" (click)="executeDelete()">Yes, Delete It</button>
+      <button class="btn-cancel-big" (click)="showConfirmModal = false">Cancel</button>
+    </div>
+  </div>
+</div>

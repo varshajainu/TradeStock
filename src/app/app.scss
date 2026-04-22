@@ -1,0 +1,200 @@
+:host {
+  display: block;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  background-color: #f4f7fe;
+  margin: -8px; 
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #111c44;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+
+  .brand {
+    text-align: center;
+    padding-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    color: #f6c042; 
+  }
+
+  .nav-links a {
+    display: block;
+    padding: 15px 25px;
+    color: #a0aec0;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.3s;
+
+    &:hover, 
+    &.active-link {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-left: 4px solid #f6c042;
+    }
+  }
+
+  .nav-links .refresh-link {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e0;
+
+    .refresh-icon {
+      margin-right: 8px;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-left: none;
+      color: white;
+    }
+  }
+
+  .app-version-footer {
+    margin-top: auto; 
+    padding: 15px 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+    p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.5); 
+      font-size: 0.75rem; 
+      font-family: monospace; 
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* =========================================
+   PERFECT SCREENSHOT MODAL UI 
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(17, 28, 68, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100000; 
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  width: 550px; /* Sized perfectly to the screenshot */
+  max-width: 95%;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.backup-header {
+  background: #111c44; /* Deep blue header */
+  padding: 20px 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h3 {
+    margin: 0;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+.confirm-body {
+  padding: 40px 30px;
+  text-align: center;
+  background: white;
+
+  p {
+    font-size: 22px;
+    color: #111c44;
+    margin: 0 0 15px 0;
+    line-height: 1.4;
+  }
+
+  .sub-text {
+    font-size: 16px;
+    color: #718096;
+    margin: 0;
+  }
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 15px;
+  padding: 20px 30px 30px 30px;
+  background: white;
+
+  button {
+    flex: 1;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .bg-red {
+    background: #e53e3e;
+    color: white;
+    &:hover { background: #c53030; }
+  }
+
+  .bg-blue {
+    background: #3182ce;
+    color: white;
+    &:hover { background: #2b6cb0; }
+  }
+
+  .btn-cancel-big {
+    background: #cbd5e0;
+    color: #2d3748;
+    &:hover { background: #a0aec0; }
+  }
+}
+
+/* =========================================
+   BULLETPROOF PDF PRINT FIX
+   ========================================= */
+@media print {
+  .sidebar { display: none !important; }
+  .app-layout {
+    display: block !important;
+    height: auto !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+  .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+}

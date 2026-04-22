@@ -1,0 +1,60 @@
+<div class="dashboard-container">
+  
+  <div class="header-row">
+    <div class="welcome-header">
+      
+      <div class="user-display" *ngIf="!isEditingName">
+        <h2>Welcome in, <span class="highlight-name">{{ currentUser }}</span> 👋</h2>
+        <button class="btn-switch-user" (click)="editUser()">🔄 Switch User</button>
+      </div>
+
+      <div class="user-edit-form" *ngIf="isEditingName">
+        <h2>Who is using the app?</h2>
+        <input 
+          type="text" 
+          [(ngModel)]="tempName" 
+          (keyup.enter)="saveUser()" 
+          placeholder="Enter your name"
+          autofocus
+        >
+        <button class="btn-save-user" (click)="saveUser()">Save</button>
+        <button class="btn-cancel-user" (click)="cancelEdit()">Cancel</button>
+      </div>
+
+    </div>
+
+    <div class="action-buttons">
+      <!-- <button (click)="loadData()" class="icon-refresh-btn" title="Refresh Dashboard">🔄</button> -->
+    </div>
+  </div>
+
+  <p class="section-subtitle">Current Store Inventory & Quantities</p>
+
+  <div class="items-grid">
+    <div 
+      class="item-card" 
+      *ngFor="let item of stockItems"
+      [ngClass]="{'low-stock': item.quantity <= (item.lowStockThreshold || 5)}"
+    >
+      <div class="card-header">
+        <span class="category-badge">{{ item.category }}</span>
+        <span class="id-badge">#{{ item.id }}</span>
+      </div>
+      
+      <h3 class="item-name">{{ item.name }}</h3>
+      
+      <div class="quantity-section">
+        <span class="qty-label">Current Stock:</span>
+        <span class="qty-number">{{ item.quantity || 0 }}</span>
+      </div>
+      
+      <div class="alert-message" *ngIf="item.quantity <= (item.lowStockThreshold || 5)">
+        ⚠️ Low Stock Alert
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="stockItems.length === 0">
+      <p>No items in the database yet. Go to Inventory to add some!</p>
+    </div>
+  </div>
+</div>

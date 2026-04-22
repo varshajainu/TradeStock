@@ -1,0 +1,131 @@
+<div class="inventory-container">
+  
+  <div class="header-row">
+    <h2>Master Item Catalog</h2>
+    <!-- <button (click)="loadInventory()" class="icon-refresh-btn" title="Refresh Data">🔄</button> -->
+  </div>
+  
+  <div class="action-section">
+    <div class="import-wrapper">
+      <input type="file" #csvInput accept=".csv" (change)="onFileSelected($event)" class="hidden-input">
+      <button (click)="csvInput.click()" class="btn-import">📁 Import CSV</button>
+    </div>
+    
+    <button (click)="showAddForm = !showAddForm; isEditing = false" class="btn-toggle-add">
+      {{ showAddForm && !isEditing ? '❌ Cancel Adding' : '➕ Add New Item Manually' }}
+    </button>
+
+    <button (click)="openActionModal('edit')" class="btn-global-edit">✏️ Edit Item</button>
+    <button (click)="openActionModal('delete')" class="btn-global-delete">🗑️ Delete Item</button>
+  </div>
+
+  <div *ngIf="showAddForm" class="manual-add-form" [ngClass]="{'edit-mode': isEditing}">
+    <h3>{{ isEditing ? 'Edit Product: ' + newItem.name : 'Add New Product' }}</h3>
+    <div class="form-grid">
+      
+      <div class="input-group">
+        <label>Item Name (with size/weight)</label>
+        <input type="text" [(ngModel)]="newItem.name" placeholder="e.g., Dairy Pellets (50kg)">
+      </div>
+      
+      <div class="input-group">
+        <label>Category</label>
+        <input 
+          type="text" 
+          [(ngModel)]="newItem.category" 
+          list="category-options" 
+          placeholder="e.g., Formulated Feeds"
+        >
+        <datalist id="category-options">
+          <option *ngFor="let cat of getUniqueCategories()" [value]="cat"></option>
+        </datalist>
+      </div>
+      
+      <div class="input-group number-input">
+        <label>Low Stock Alert At</label>
+        <input type="number" [(ngModel)]="newItem.lowStockThreshold" min="0">
+      </div>
+
+      <div class="input-group button-group">
+        <button (click)="saveItem()" class="btn-save-item" [ngClass]="{'btn-update': isEditing}">
+          {{ isEditing ? 'Update Item' : 'Save Item' }}
+        </button>
+        <button *ngIf="isEditing" (click)="resetForm()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="applyFiltersAndSort()" 
+      placeholder="Search for an item..."
+      class="search-bar"
+    >
+    <select [(ngModel)]="sortOption" (change)="applyFiltersAndSort()" class="sort-select">
+      <option value="name-asc">Sort: Name (A-Z)</option>
+      <option value="name-desc">Sort: Name (Z-A)</option>
+    </select>
+  </div>
+
+  <table class="stock-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Item Name</th>
+        <th>Category</th>
+        <th>Low Stock Alert At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filteredItems">
+        <td>{{item.id}}</td>
+        <td>{{item.name}}</td>
+        <td>{{item.category}}</td>
+        <td>{{item.lowStockThreshold || 5}}</td>
+      </tr>
+      <tr *ngIf="filteredItems.length === 0">
+        <td colspan="4" class="empty-state">No items found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="modal-overlay" *ngIf="showActionModal">
+  <div class="modal-content">
+    
+    <div class="modal-header">
+      <h3>{{ modalActionType === 'edit' ? '✏️ Select Item to Edit' : '🗑️ Select Item to Delete' }}</h3>
+      <button class="close-modal-btn" (click)="closeActionModal()">✖</button>
+    </div>
+
+    <div class="modal-search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="modalSearchTerm" 
+        (input)="filterModalItems()" 
+        placeholder="Enter Item ID or Name..." 
+        autofocus
+      >
+    </div>
+
+    <div class="modal-item-list">
+      <div 
+        class="modal-item" 
+        *ngFor="let item of modalFilteredItems" 
+        (click)="handleModalSelection(item)"
+        [ngClass]="{'delete-hover': modalActionType === 'delete'}"
+      >
+        <span class="modal-item-id">#{{ item.id }}</span>
+        <span class="modal-item-name">{{ item.name }}</span>
+        <span class="modal-item-category">({{ item.category }})</span>
+      </div>
+      
+      <div class="modal-empty" *ngIf="modalFilteredItems.length === 0">
+        No items match "{{ modalSearchTerm }}"
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="reports-container">
+  <div class="header-row">
+    <h2>Transaction Reports</h2>
+    <div class="action-buttons">
+      <button (click)="exportToExcel()" class="btn-export">📊 Export Data to Excel</button>
+      <button (click)="openPrintPreview()" class="btn-print">🖨️ Print / Save PDF</button>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <h3 class="summary-title">Total Store Value</h3>
+    <p class="summary-value">₹{{ totalStoreValue }}</p>
+  </div>
+
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Item Name</th>
+        <th>Type</th>
+        <th>Account</th>
+        <th>Qty Changed</th>
+        <th>Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tx of transactions">
+        <td>{{ tx.date | date:'short' }}</td>
+        <td class="item-name">{{ tx.item_name }}</td>
+        <td>
+          <span [ngClass]="tx.type === 'IN' ? 'badge-in' : 'badge-out'">
+            {{ tx.type === 'IN' ? 'IN' : 'OUT' }}
+          </span>
+        </td>
+        <td>
+          <span class="upi-text">
+            {{ tx.bank_name ? '🏦 ' + tx.bank_name : '💵 Cash (Legacy)' }}
+          </span>
+        </td>
+        <td class="qty-cell">{{ tx.quantity_changed }}</td>
+        <td class="amount-cell" [ngClass]="tx.type === 'IN' ? 'text-danger' : 'text-success'">
+          {{ tx.type === 'IN' ? '-' : '+' }} ₹{{ tx.total_amount }}
+        </td>
+      </tr>
+      <tr *ngIf="transactions.length === 0">
+        <td colspan="6" class="empty-state">No transactions found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

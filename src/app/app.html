@@ -1,0 +1,48 @@
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h2>TradeStock</h2>
+    </div>
+    
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active-link">Inventory</a>
+      <a routerLink="/transactions" routerLinkActive="active-link">Transactions</a>
+      <a routerLink="/finances" routerLinkActive="active-link">Finances</a>
+      <a routerLink="/reports" routerLinkActive="active-link">Reports</a>
+      
+      <a href="javascript:void(0)" class="refresh-link" (click)="globalRefresh()">
+        <span class="refresh-icon">🔄</span> Reload App
+      </a>
+    </nav>
+
+    <div class="app-version-footer">
+      <p>v{{ appVersion }}</p> 
+    </div>
+  </aside>
+  
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="showCloseModal">
+  <div class="modal-content confirm-box">
+    
+    <div class="modal-header backup-header">
+      <h3>⚠️ Warning</h3>
+    </div>
+    
+    <div class="confirm-body">
+      <p>Are you sure you want to exit without backing up?</p>
+      <p class="sub-text">Backing up securely saves all your recent transactions in case your system crashes.</p>
+    </div>
+    
+    <div class="confirm-actions">
+      <button class="bg-blue" (click)="backupAndClose()">Yes, Backup Data</button>
+      <button class="bg-red" (click)="closeWithoutBackup()">Skip Backup</button>
+      <button class="btn-cancel-big" (click)="cancelClose()">Cancel</button>
+    </div>
+    
+  </div>
+</div>

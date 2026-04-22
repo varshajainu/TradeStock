@@ -1,0 +1,111 @@
+<div class="transaction-container">
+  <div class="header-row">
+    <h2>Record Transactions</h2>
+    <div class="global-actions">
+      <!-- <button (click)="loadData()" class="icon-refresh-btn" title="Refresh Data">🔄</button> -->
+      <button (click)="openModal('edit')" class="btn-global-edit">✏️ Edit</button>
+      <button (click)="openModal('delete')" class="btn-global-delete">🗑️ Delete</button>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <select [(ngModel)]="newTx.type" [ngClass]="{'bg-red': newTx.type === 'OUT', 'bg-green': newTx.type === 'IN'}">
+          <option value="OUT">🔴 Stock OUT (Customer Sale)</option>
+          <option value="IN">🟢 Stock IN (Supplier Purchase)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Select Item</label>
+        <select [(ngModel)]="newTx.item_id">
+          <option value="" disabled>Select from catalog</option>
+          <option *ngFor="let item of stockItems" [value]="item.id">{{ item.name }} (Stock: {{item.quantity}})</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Quantity</label>
+<input 
+  type="number" 
+  name="quantity_changed" 
+  [(ngModel)]="newTx.quantity_changed" 
+  (ngModelChange)="calculateTotal()"
+  min="1"
+>      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Select Bank Account</label>
+        <select [(ngModel)]="newTx.account_id" class="bg-blue-light">
+          <option value="" disabled>Choose Account...</option>
+          <option *ngFor="let acc of accounts" [value]="acc.id">🏦 {{acc.bankName}} ({{acc.holderName}})</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Pricing Mode</label>
+        <select [(ngModel)]="newTx.priceMode" (change)="calculateTotal()">
+          <option value="total">Enter Total Amount</option>
+          <option value="unit">Calculate from Unit Price</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="newTx.priceMode === 'unit'">
+        <label>Price per Unit (₹)</label>
+        <input type="number" [(ngModel)]="newTx.unitPrice" (input)="calculateTotal()" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>Final Total (₹)</label>
+        <input type="number" [(ngModel)]="newTx.total_amount" [disabled]="newTx.priceMode === 'unit'">
+      </div>
+    </div>
+
+    <div class="action-buttons-row">
+      <button class="btn-submit" (click)="saveTransaction()">
+        {{ isEditing ? 'Update Transaction' : 'Record Transaction' }}
+      </button>
+      <button class="btn-cancel" *ngIf="isEditing" (click)="cancelEdit()">Cancel Edit</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ modalAction === 'edit' ? '✏️ Edit' : '🗑️ Delete' }} Transaction</h3>
+      <button class="close-modal-btn" (click)="closeModal()">✖</button>
+    </div>
+    <div class="modal-search-box">
+      <input type="text" [(ngModel)]="modalSearch" (ngModelChange)="filterModal()" placeholder="Search ID or Item Name...">
+    </div>
+    <div class="modal-item-list">
+      <div class="modal-item" *ngFor="let tx of filteredTransactions" (click)="handleModalSelect(tx)" [ngClass]="{'delete-hover': modalAction === 'delete'}">
+        <span class="modal-item-id">#{{tx.id}}</span>
+        <span class="modal-item-name">{{tx.item_name}}</span>
+        <span class="modal-item-category">{{tx.type}} | ₹{{tx.total_amount}}</span>
+      </div>
+      <div class="modal-empty" *ngIf="filteredTransactions.length === 0">No transactions found.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showConfirmModal">
+  <div class="modal-content confirm-box">
+    <div class="modal-header delete-header">
+      <h3>⚠️ Warning</h3>
+    </div>
+    <div class="confirm-body">
+      <p>Are you sure you want to completely delete Transaction <strong>#{{ txToDelete }}</strong>?</p>
+      <p class="sub-text">This will automatically adjust the inventory stock back to normal.</p>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-delete" (click)="executeDelete()">Yes, Delete It</button>
+      <button class="btn-cancel-big" (click)="showConfirmModal = false">Cancel</button>
+    </div>
+  </div>
+</div>

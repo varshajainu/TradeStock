@@ -1,0 +1,181 @@
+.reports-container {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+      color: #111c44;
+      font-size: 32px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+  }
+
+  .btn-export {
+    background-color: #3182ce;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #2c5282;
+    }
+  }
+
+  .btn-print {
+    background-color: #38a169;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #2f855a;
+    }
+  }
+
+  .summary-box {
+    background: #e6fffa;
+    border-left: 5px solid #38b2ac;
+    padding: 20px;
+    margin-bottom: 30px;
+    color: #234e52;
+
+    .summary-title {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .summary-value {
+      margin: 10px 0 0 0;
+      font-size: 32px;
+      font-weight: bold;
+    }
+  }
+
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 16px;
+      text-align: left;
+      font-size: 18px;
+      border: 2px solid #cbd5e0;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #4a5568;
+      font-weight: bold;
+    }
+
+    .item-name {
+      font-weight: bold;
+      color: #111c44;
+    }
+
+    .qty-cell {
+      font-weight: bold;
+      background: #f7fafc;
+    }
+
+    .amount-cell {
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .text-success {
+      color: #38a169;
+    }
+
+    .text-danger {
+      color: #e53e3e;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      font-size: 18px;
+    }
+
+    .badge-in {
+      background-color: #c6f6d5;
+      color: #22543d;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .badge-out {
+      background-color: #feebc8;
+      color: #7b341e;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .upi-text {
+      color: #3182ce;
+      font-weight: bold;
+    }
+  }
+}
+
+/* =========================================
+   BULLETPROOF PDF PRINT STYLING
+   ========================================= */
+@media print {
+  /* This ensures the buttons absolutely vanish when Electron generates the PDF */
+  .action-buttons {
+    display: none !important;
+  }
+
+  .reports-container {
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Make sure the table borders turn solid black for clean printing */
+  .report-table th,
+  .report-table td {
+    border: 2px solid #000 !important;
+    color: #000 !important;
+    padding: 12px !important;
+  }
+
+  .badge-in,
+  .badge-out {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+}
